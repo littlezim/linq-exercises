@@ -19,7 +19,12 @@ namespace LinqExercises.Controllers
         [HttpGet, Route("api/orders/between/{startDate}/{endDate}"), ResponseType(typeof(IQueryable<Order>))]
         public IHttpActionResult GetOrdersBetween(DateTime startDate, DateTime endDate)
         {
-            throw new NotImplementedException("Write a query to return all orders with required dates between Jan 1, 1997 and Dec 31, 1997 with freight under 100 units.");
+            //throw new NotImplementedException("Write a query to return all orders with required dates between Jan 1, 1997 and Dec 31, 1997 with freight under 100 units.");
+            var resultSet = from order in _db.Orders
+                            where (order.RequiredDate >= startDate) && (order.RequiredDate <= endDate) && (order.Freight < 100)
+                            select order;
+
+            return Ok(resultSet);
         }
 
         //GET: api/orders/reports/purchase
@@ -27,7 +32,17 @@ namespace LinqExercises.Controllers
         public IHttpActionResult PurchaseReport()
         {
             // See this blog post for more information about projecting to anonymous objects. https://blogs.msdn.microsoft.com/swiss_dpe_team/2008/01/25/using-your-own-defined-type-in-a-linq-query-expression/
-            throw new NotImplementedException("Write a query to return an array of anonymous objects that have two properties. A Product property and the quantity ordered for that product labelled as 'QuantityPurchased' ordered by QuantityPurchased in descending order.");
+            //throw new NotImplementedException("Write a query to return an array of anonymous objects that have two properties. A Product property and the quantity ordered for that product labelled as 'QuantityPurchased' ordered by QuantityPurchased in descending order.");
+            var resultSet = from product in _db.Products
+                            select new
+                            {
+                                product = product.ProductName,
+                                QuantityPurchased = product.Order_Details.Sum(o => o.Quantity)
+                            } into anon
+                            orderby anon.QuantityPurchased descending
+                            select anon;
+                 
+            return Ok(resultSet);
         }
 
         protected override void Dispose(bool disposing)

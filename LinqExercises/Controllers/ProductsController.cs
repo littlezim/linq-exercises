@@ -19,14 +19,21 @@ namespace LinqExercises.Controllers
         [HttpGet, Route("api/products/discontinued/count"), ResponseType(typeof(int))]
         public IHttpActionResult GetDiscontinuedCount()
         {
-            throw new NotImplementedException("Write a query to return the number of discontinued products in the Products table.");
+            //throw new NotImplementedException("Write a query to return the number of discontinued products in the Products table.");
+            var resultSet = _db.Products.Count(p => p.Discontinued == true);
+
+            return Ok(resultSet);
+
         }
 
         // GET: api/categories/Condiments/products
         [HttpGet, Route("api/categories/{categoryName}/products"), ResponseType(typeof(IQueryable<Product>))]
         public IHttpActionResult GetProductsInCategory(string categoryName)
         {
-            throw new NotImplementedException("Write a query to return all products that fall within the given categoryName.");
+            //throw new NotImplementedException("Write a query to return all products that fall within the given categoryName.");
+            var resultSet = _db.Products.Where(c => c.Category.CategoryName == categoryName);
+
+            return Ok(resultSet);
         }
 
         // GET: api/products/reports/stock
@@ -34,7 +41,17 @@ namespace LinqExercises.Controllers
         public IHttpActionResult GetStockReport()
         {
             // See this blog post for more information about projecting to anonymous objects. https://blogs.msdn.microsoft.com/swiss_dpe_team/2008/01/25/using-your-own-defined-type-in-a-linq-query-expression/
-            throw new NotImplementedException("Write a query to return an array of anonymous objects that have two properties. A Product property and the total units in stock for each product labelled as 'TotalStockUnits' where TotalStockUnits is greater than 100.");
+            //throw new NotImplementedException("Write a query to return an array of anonymous objects that have two properties. A Product property and the total units in stock for each product labelled as 'TotalStockUnits' where TotalStockUnits is greater than 100.");
+            var resultSet = from product in _db.Products
+                            select new
+                            {
+                                product = product.ProductName,
+                                TotalStockUnits = (product.UnitsInStock + product.UnitsOnOrder)
+                            } into anon
+                            where anon.TotalStockUnits > 100
+                            select anon;
+
+            return Ok(resultSet);
         }
 
         protected override void Dispose(bool disposing)
